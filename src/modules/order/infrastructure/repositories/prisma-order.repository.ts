@@ -8,7 +8,7 @@ import { Prisma, OrderStatus as PrismaOrderStatus } from '@prisma/client';
 export class PrismaOrderRepository implements IOrderRepository {
   constructor(private prisma: PrismaService) {}
 
-  async save(order: Order): Promise<void> {
+  async save(order: Order, context?: unknown): Promise<void> {
     const data = {
       userId: order.userId,
       status: order.status as unknown as PrismaOrderStatus,
@@ -22,8 +22,10 @@ export class PrismaOrderRepository implements IOrderRepository {
       },
     };
 
+    const prisma = (context as Prisma.TransactionClient) || this.prisma;
+
     // Assuming new order always
-    await this.prisma.order.create({
+    await prisma.order.create({
       data: data,
     });
   }

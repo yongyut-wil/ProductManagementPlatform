@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { BullModule } from '@nestjs/bullmq';
+import { BullBoardModule } from '@bull-board/nestjs';
+import { ExpressAdapter } from '@bull-board/express';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
@@ -21,6 +23,10 @@ import { PrismaModule } from './infrastructure/prisma/prisma.module';
         },
       }),
       inject: [ConfigService],
+    }),
+    BullBoardModule.forRoot({
+      route: '/queues',
+      adapter: ExpressAdapter,
     }),
     AuthModule,
     ProductModule,

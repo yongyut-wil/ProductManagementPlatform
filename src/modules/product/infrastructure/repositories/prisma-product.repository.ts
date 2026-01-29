@@ -40,8 +40,9 @@ export class PrismaProductRepository implements IProductRepository {
     return products.map((p) => this.toDomain(p));
   }
 
-  async updateStock(id: string, quantity: number): Promise<void> {
-    await this.prisma.product.update({
+  async updateStock(id: string, quantity: number, context?: unknown): Promise<void> {
+    const prisma = (context as Prisma.TransactionClient) || this.prisma;
+    await prisma.product.update({
       where: { id },
       data: { stock: { decrement: quantity } },
     });

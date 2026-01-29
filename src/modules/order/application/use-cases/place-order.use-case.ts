@@ -6,17 +6,19 @@ import { IProductRepository } from '../../../product/domain/product.repository.i
 import { OrderProducer } from '../../infrastructure/queue/order.producer';
 import { Result } from '../../../../shared/core/result';
 import { Order } from '../../domain/order.entity';
+import { ITransactionManager } from '../../../../shared/core/transaction-manager.interface';
 
 @Injectable()
 export class PlaceOrderUseCase implements UseCase<PlaceOrderDto, Promise<Result<void>>> {
   constructor(
     @Inject(IOrderRepository) private orderRepo: IOrderRepository,
     @Inject(IProductRepository) private productRepo: IProductRepository,
+    @Inject(ITransactionManager) private transactionManager: ITransactionManager,
     private orderProducer: OrderProducer,
   ) {}
 
   async execute(request: PlaceOrderDto): Promise<Result<void>> {
-    const items = [];
+    const items: { productId: string; quantity: number; price: number }[] = [];
     for (const item of request.items) {
       const product = await this.productRepo.findById(item.productId);
       if (!product) return Result.fail(`Product ${item.productId} not found`);
@@ -29,14 +31,21 @@ export class PlaceOrderUseCase implements UseCase<PlaceOrderDto, Promise<Result<
       items: items,
     });
 
-    await this.orderRepo.save(order);
+    try {
+      await this.transactionManager.run(async (context) => {
+        await this.orderRepo.save(order, context);
 
-    for (const item of items) {
-      await this.productRepo.updateStock(item.productId, item.quantity);
+        for (const item of items) {
+          await this.productRepo.updateStock(item.productId, item.quantity, context);
+        }
+      });
+
+      await this.orderProducer.addOrderCreatedJob(order.id, order.userId);
+
+      return Result.ok();
+    } catch (error) {
+      // In a real app, handle specific error types
+      return Result.fail(error instanceof Error ? error.message : 'Transaction failed');
     }
-
-    await this.orderProducer.addOrderCreatedJob(order.id, order.userId);
-
-    return Result.ok();
   }
 }
