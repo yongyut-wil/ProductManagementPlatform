@@ -28,4 +28,5 @@ export class User extends Entity<UserProps> {
   get password(): string | undefined { return this.props.password; }
   get role(): UserRole { return this.props.role; }
   get name(): string | null | undefined { return this.props.name; }
+  get createdAt(): Date | undefined { return this.props.createdAt; }
 }

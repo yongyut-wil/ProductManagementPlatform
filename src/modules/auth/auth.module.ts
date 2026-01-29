@@ -5,6 +5,7 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthController } from './infrastructure/http/auth.controller';
 import { RegisterUserUseCase } from './application/use-cases/register.use-case';
 import { LoginUserUseCase } from './application/use-cases/login.use-case';
+import { GetMeUseCase } from './application/use-cases/get-me.use-case';
 import { PrismaUserRepository } from './infrastructure/repositories/prisma-user.repository';
 import { IUserRepository } from './domain/user.repository.interface';
 import { PrismaModule } from '../../infrastructure/prisma/prisma.module';
@@ -27,6 +28,7 @@ import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
   providers: [
     RegisterUserUseCase,
     LoginUserUseCase,
+    GetMeUseCase,
     JwtStrategy,
     {
       provide: IUserRepository,
@@ -36,3 +38,4 @@ import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
   exports: [JwtModule, PassportModule],
 })
 export class AuthModule {}
+
