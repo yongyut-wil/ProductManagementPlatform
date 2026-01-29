@@ -5,6 +5,9 @@ import { RegisterUserDto } from '../../application/dto/register-user.dto';
 import { LoginUserDto } from '../../application/dto/login-user.dto';
 import { ApiResponse } from '../../../../shared/dto/response.dto';
 
+import { ApiTags, ApiOperation, ApiResponse as SwaggerApiResponse } from '@nestjs/swagger';
+
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -13,6 +16,9 @@ export class AuthController {
   ) {}
 
   @Post('register')
+  @ApiOperation({ summary: 'Register a new user' })
+  @SwaggerApiResponse({ status: 201, description: 'User registered successfully' })
+  @SwaggerApiResponse({ status: 400, description: 'Bad Request' })
   async register(@Body() dto: RegisterUserDto) {
     const result = await this.registerUseCase.execute(dto);
     if (result.isFailure) {
@@ -22,6 +28,9 @@ export class AuthController {
   }
 
   @Post('login')
+  @ApiOperation({ summary: 'Login user' })
+  @SwaggerApiResponse({ status: 201, description: 'Login successful' })
+  @SwaggerApiResponse({ status: 400, description: 'Invalid credentials' })
   async login(@Body() dto: LoginUserDto) {
     const result = await this.loginUseCase.execute(dto);
     if (result.isFailure) {

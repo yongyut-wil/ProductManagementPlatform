@@ -1,7 +1,16 @@
+import { ApiProperty } from '@nestjs/swagger';
+
 export class ApiResponse<T> {
+  @ApiProperty()
   success: boolean;
+
+  @ApiProperty({ required: false })
   data?: T;
+
+  @ApiProperty({ required: false })
   message?: string;
+
+  @ApiProperty({ required: false })
   error?: any;
 
   constructor(success: boolean, data?: T, message?: string, error?: any) {
