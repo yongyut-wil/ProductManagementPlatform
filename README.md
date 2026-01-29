@@ -1,98 +1,236 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 📦 Enterprise Product Management Platform (NestJS Backend)
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+โปรเจกต์นี้เป็น Backend สำหรับระบบจัดการสินค้าและคำสั่งซื้อระดับ Enterprise พัฒนาด้วย **NestJS** โดยใช้สถาปัตยกรรม **Hexagonal Architecture (Ports and Adapters)** เพื่อให้โค้ดมีความยืดหยุ่น ทดสอบง่าย และรองรับการขยายตัวในอนาคต
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 🚀 Tech Stack
 
-## Description
+-   **Language**: TypeScript
+-   **Framework**: NestJS
+-   **Database**: PostgreSQL
+-   **ORM**: Prisma
+-   **Queue & Async**: BullMQ + Redis
+-   **Authentication**: JWT + RBAC (Role-Based Access Control)
+-   **Monitoring**: Bull Board
+-   **Architecture**: Modular + Hexagonal (Clean Architecture)
+-   **Testing**: Jest (Unit & E2E)
+-   **Infrastructure**: Docker & Docker Compose
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+---
 
-## Project setup
+## 🏗️ Architecture Overview (สถาปัตยกรรม)
 
+โปรเจกต์นี้แยก Layer อย่างชัดเจนตามหลักการ Hexagonal Architecture:
+
+1.  **Domain Layer** (`src/modules/*/domain`):
+    -   เก็บ **Entities** และ **Business Logic**
+    -   กำหนด **Repository Interfaces** (Ports)
+    -   *ไม่ขึ้นกับ Framework หรือ Database ใดๆ*
+2.  **Application Layer** (`src/modules/*/application`):
+    -   เก็บ **Use Cases** (Business Flows)
+    -   เก็บ **DTOs** (Data Transfer Objects)
+    -   เรียกใช้ Domain Objects และ Interfaces
+3.  **Infrastructure Layer** (`src/modules/*/infrastructure`):
+    -   เก็บ **Adapters** ที่ implement Interfaces จาก Domain (เช่น PrismaRepository)
+    -   เก็บ **Controllers** (HTTP Adapters)
+    -   เก็บ **Queue Consumers/Producers**
+
+---
+
+## 🛠️ การติดตั้งและเริ่มต้นใช้งาน (Setup Guide)
+
+### 1. Prerequisites (สิ่งที่ต้องมี)
+-   Node.js (v18+)
+-   Docker & Docker Compose
+-   npm หรือ yarn
+
+### 2. ติดตั้ง Dependencies
 ```bash
-$ npm install
+npm install
 ```
 
-## Compile and run the project
+### 3. ตั้งค่า Environment Variables
+สร้างไฟล์ `.env` ที่ root folder (หรือใช้ไฟล์ที่สร้างให้แล้ว):
+```env
+# Database connection (สำหรับ Docker Compose)
+DATABASE_URL="postgresql://postgres:password@localhost:5432/enterprise_db?schema=public"
 
-```bash
-# development
-$ npm run start
+# Redis connection
+REDIS_HOST=localhost
+REDIS_PORT=6379
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+# JWT Secret
+JWT_SECRET=your_super_secret_key
 ```
 
-## Run tests
-
+### 4. รัน Infrastructure (Database & Redis)
+เราใช้ Docker Compose เพื่อจำลอง Database และ Redis:
 ```bash
-# unit tests
-$ npm run test
+docker-compose up -d
+```
+*รอสักครู่ให้ Container เริ่มทำงานเสร็จสมบูรณ์*
 
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+### 5. Setup Database Schema (Prisma)
+สร้าง Table ใน Database ตาม Schema ที่กำหนดไว้:
+```bash
+npx prisma migrate dev --name init
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
+### 6. รันโปรเจกต์
+**โหมด Development:**
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm run start:dev
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+**โหมด Production:**
+```bash
+npm run build
+npm run start:prod
+```
 
-## Resources
+---
 
-Check out a few resources that may come in handy when working with NestJS:
+## 🧪 การทดสอบ (Testing)
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### Unit Tests
+ทดสอบ Business Logic ในระดับ UseCase และ Service:
+```bash
+npm run test
+```
 
-## Support
+### E2E Tests (End-to-End)
+ทดสอบ Flow การทำงานจริงตั้งแต่ API จนถึง Database (จำลอง):
+```bash
+npm run test:e2e
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+---
 
-## Stay in touch
+## 📚 คู่มือการใช้งาน API (API Guide)
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### 1. Authentication (ระบบยืนยันตัวตน)
 
-## License
+**Register (สมัครสมาชิก)**
+-   **POST** `/auth/register`
+-   **Body**:
+    ```json
+    {
+      "email": "user@example.com",
+      "password": "password123",
+      "name": "John Doe"
+    }
+    ```
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+**Login (เข้าสู่ระบบ)**
+-   **POST** `/auth/login`
+-   **Body**:
+    ```json
+    {
+      "email": "user@example.com",
+      "password": "password123"
+    }
+    ```
+-   **Response**: ได้รับ `accessToken` เพื่อใช้แนบใน Header (`Authorization: Bearer <token>`)
+
+### 2. Products (จัดการสินค้า)
+
+**Create Product (สร้างสินค้า)**
+-   **POST** `/products`
+-   **Headers**: `Authorization: Bearer <token>`
+-   **Body**:
+    ```json
+    {
+      "name": "iPhone 15",
+      "description": "Latest Apple Phone",
+      "price": 35000,
+      "stock": 100
+    }
+    ```
+
+**Get All Products (ดูสินค้าทั้งหมด)**
+-   **GET** `/products`
+
+### 3. Orders (สั่งซื้อสินค้า)
+
+**Place Order (สั่งซื้อ)**
+-   **POST** `/orders`
+-   **Body**:
+    ```json
+    {
+      "userId": "<USER_ID_FROM_DB>",
+      "items": [
+        {
+          "productId": "<PRODUCT_ID_FROM_DB>",
+          "quantity": 1
+        }
+      ]
+    }
+    ```
+-   **Process**:
+    1.  ตรวจสอบ Stock สินค้า
+    2.  ตัด Stock (Atomic Transaction)
+    3.  บันทึก Order ลง Database
+    4.  ส่งงานเข้า Queue (`orders` queue) เพื่อส่งอีเมลแจ้งเตือน (Async)
+
+---
+
+## 📊 Monitoring (ระบบติดตาม)
+
+โปรเจกต์นี้ติดตั้ง **Bull Board** เพื่อดูสถานะของ Queue (Waiting, Active, Completed, Failed)
+
+-   เปิด Browser ไปที่: `http://localhost:3000/queues`
+
+---
+
+## 📂 โครงสร้างโฟลเดอร์ (Folder Structure)
+
+```
+src/
+├── app.module.ts            # Main Module
+├── main.ts                  # Entry Point
+├── infrastructure/          # Shared Infrastructure (Prisma, Config)
+│   └── prisma/
+├── shared/                  # Shared Kernel (Entity, Result, DTOs)
+│   ├── core/                # Core classes (Entity, Result, TransactionManager)
+│   └── dto/                 # Generic DTOs (ApiResponse)
+└── modules/                 # Feature Modules
+    ├── auth/                # Authentication Module
+    │   ├── domain/          # User Entity, Repository Interface
+    │   ├── application/     # Register/Login UseCases, DTOs
+    │   └── infrastructure/  # AuthController, PrismaUserRepository, Strategies
+    ├── product/             # Product Module
+    └── order/               # Order Module
+        ├── domain/
+        ├── application/
+        └── infrastructure/
+            ├── http/        # Controllers
+            ├── repositories/# Prisma Repository Implementation
+            └── queue/       # BullMQ Producer & Processor (Worker)
+```
+
+## 💡 Developer Guide
+
+### การเพิ่มฟีเจอร์ใหม่ (How to add a new feature)
+
+1.  **Domain**:
+    -   สร้าง `Entity` ใน `domain/`
+    -   กำหนด `Repository Interface` ใน `domain/`
+2.  **Application**:
+    -   สร้าง `UseCase` ใน `application/use-cases/`
+    -   สร้าง `DTO` สำหรับ Input/Output
+3.  **Infrastructure**:
+    -   Implement Repository Interface ใน `infrastructure/repositories/`
+    -   สร้าง `Controller` เพื่อรับ Request
+    -   เชื่อมต่อทุกอย่างใน `Module`
+
+### Transaction Management
+หากต้องการให้หลาย Operation ทำงานพร้อมกันแบบ Atomic (สำเร็จทั้งหมด หรือล้มเหลวทั้งหมด):
+-   Inject `ITransactionManager` เข้าไปใน UseCase
+-   ใช้คำสั่ง `await this.transactionManager.run(async (context) => { ... })`
+-   ส่ง `context` ไปยัง Repository methods
+
+```typescript
+await this.transactionManager.run(async (context) => {
+  await this.orderRepo.save(order, context);
+  await this.productRepo.updateStock(productId, qty, context);
+});
+```
