@@ -234,3 +234,115 @@ await this.transactionManager.run(async (context) => {
   await this.productRepo.updateStock(productId, qty, context);
 });
 ```
+
+---
+
+## ⚡ Cheat Sheet / Command Reference (รวมคำสั่งที่ใช้บ่อย)
+
+### 🐳 Docker Commands (จัดการ Database/Redis)
+
+-   **Start Services (เปิด DB)**: เริ่มทำงาน Postgres และ Redis ใน Background
+    ```bash
+    docker-compose up -d
+    ```
+
+-   **Stop Services (ปิด DB)**: หยุดการทำงานของ Container
+    ```bash
+    docker-compose stop
+    ```
+
+-   **View Logs (ดู Log)**: ดูว่า DB ทำงานปกติไหม
+    ```bash
+    docker-compose logs -f
+    ```
+
+-   **Reset/Clean Data (ล้างข้อมูล)**: ลบ Container และ Volume ทั้งหมด (ข้อมูลหายหมด!)
+    ```bash
+    docker-compose down -v
+    ```
+
+### 🗄️ Prisma Commands (จัดการ Database Schema)
+
+-   **Migrate Database (อัพเดทโครงสร้าง DB)**: ใช้เมื่อแก้ไฟล์ `schema.prisma`
+    ```bash
+    npx prisma migrate dev --name <migration_name>
+    # ตัวอย่าง: npx prisma migrate dev --name add_user_phone
+    ```
+
+-   **Generate Client (สร้าง Code)**: อัพเดท `node_modules` ให้รู้จัก Schema ใหม่ (ทำอัตโนมัติหลัง npm install)
+    ```bash
+    npx prisma generate
+    ```
+
+-   **Prisma Studio (เปิด GUI จัดการข้อมูล)**: เปิดหน้าเว็บสำหรับดู/แก้ข้อมูลใน DB
+    ```bash
+    npx prisma studio
+    ```
+
+-   **Reset Database (ล้างข้อมูล)**: ลบข้อมูลทั้งหมดแล้ว migrate ใหม่
+    ```bash
+    npx prisma migrate reset
+    ```
+
+### 🚀 NestJS Commands (รันและสร้าง Code)
+
+-   **Start (Development)**: รันแบบ Watch mode (แก้โค้ดแล้วรีสตาร์ทเอง)
+    ```bash
+    npm run start:dev
+    ```
+
+-   **Build (Production)**: คอมไพล์โค้ดเป็น JS ในโฟลเดอร์ `dist/`
+    ```bash
+    npm run build
+    ```
+
+-   **Start (Production)**: รันโค้ดจาก `dist/` (ต้อง build ก่อน)
+    ```bash
+    npm run start:prod
+    ```
+
+### 🧪 Testing Commands (ทดสอบ)
+
+-   **Unit Test**: รันเทสทั้งหมด
+    ```bash
+    npm run test
+    ```
+
+-   **Unit Test (Watch)**: รันเทสและรอฟังการแก้ไฟล์
+    ```bash
+    npm run test:watch
+    ```
+
+-   **E2E Test**: รันเทสระบบจริง
+    ```bash
+    npm run test:e2e
+    ```
+
+### 🧹 Code Quality (จัดระเบียบโค้ด)
+
+-   **Lint**: ตรวจหาจุดผิดพลาดในโค้ด
+    ```bash
+    npm run lint
+    ```
+
+-   **Format**: จัดรูปแบบโค้ดให้อ่านง่าย
+    ```bash
+    npm run format
+    ```
+
+### ❓ Troubleshooting (แก้ปัญหาทั่วไป)
+
+-   **Port Already in Use**: หากรันแล้วเจอ Error ว่า Port ชนกัน (5432, 6379, 3000)
+    1.  เช็คว่ามี process อื่นรันอยู่ไหม:
+        ```bash
+        lsof -i :<port>
+        # ตัวอย่าง: lsof -i :3000
+        ```
+    2.  สั่งปิด Process (ระวังปิดผิดตัว):
+        ```bash
+        kill <PID>
+        ```
+    3.  หรือถ้าเป็น Docker เก่าค้างอยู่:
+        ```bash
+        docker rm -f $(docker ps -aq)
+        ```
