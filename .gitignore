@@ -3,6 +3,9 @@
 /node_modules
 /build
 
+# Swagger auto-generated metadata
+/src/metadata.ts
+
 # Logs
 logs
 *.log

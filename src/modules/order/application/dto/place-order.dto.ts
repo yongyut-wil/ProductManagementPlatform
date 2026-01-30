@@ -2,7 +2,7 @@ import { IsArray, IsNotEmpty, IsNumber, IsString, ValidateNested } from 'class-v
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
-class OrderItemDto {
+export class OrderItemDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
